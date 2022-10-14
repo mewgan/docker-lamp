@@ -1,0 +1,16 @@
+<VirtualHost *:80>
+    ServerName localhost
+    <Directory />
+        AllowOverride none
+        Require all denied
+    </Directory>
+    DocumentRoot "/usr/local/apache2/htdocs"
+    <Directory "/usr/local/apache2/htdocs">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    <FilesMatch \.php$>
+        SetHandler "proxy:fcgi://{container_name}_php:9000"
+    </FilesMatch>
+</VirtualHost>

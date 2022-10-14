@@ -1,0 +1,89 @@
+version: '3'
+
+services:
+  ####################
+  # Apache container #
+  ####################
+  apache:
+    container_name: ${COMPOSE_PROJECT_NAME}_apache
+    restart: always
+    build: .docker/apache
+    volumes:
+      - ./.docker/apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+      - ./.docker/apache/vhosts:/usr/local/apache2/conf/vhosts
+      - ../:/usr/local/apache2/htdocs
+      - ./.docker/php/php.conf:/usr/local/etc/php/conf.d/custom.ini:ro
+    links:
+      - mariadb:db
+    networks:
+      - frontend
+      - backend
+
+  #################
+  # PHP container #
+  #################
+  php:
+    container_name: ${COMPOSE_PROJECT_NAME}_php
+    restart: always
+    build: .docker/php
+    expose:
+      - 9000
+    volumes:
+      - ../:/usr/local/apache2/htdocs:delegated
+      - ./.docker/php/php.conf:/usr/local/etc/php/conf.d/custom.ini:ro
+    links:
+      - maildev:maildev
+    networks:
+      - frontend
+      - backend
+
+  #####################
+  # MariaDb container #
+  #####################
+  mariadb:
+    container_name: ${COMPOSE_PROJECT_NAME}_mariadb
+    build: ./.docker/mariadb
+    restart: always
+    volumes:
+      - ./.docker/mariadb/datas:/var/lib/mysql
+      - ./.docker/mariadb/shared:/home/shared
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - backend
+
+  ########################
+  # PHPMyAdmin container #
+  ########################
+  phpmyadmin:
+    container_name: ${COMPOSE_PROJECT_NAME}_phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+    links:
+      - mariadb:db
+    networks:
+      - frontend
+      - backend
+  
+  #####################
+  # Maildev container #
+  #####################
+  maildev:
+    container_name: ${COMPOSE_PROJECT_NAME}_maildev
+    image: djfarrelly/maildev
+    networks:
+      - frontend
+      - backend
+
+
+volumes:
+  esdata:
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge

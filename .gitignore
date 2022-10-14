@@ -1,4 +1,5 @@
-/docker-composer.override.yml
-/mariadb/datas/*
-/mariadb/shared/*
-/apache/vhosts/*.conf
+.idea
+docker-compose.override.yml
+.docker/mariadb/datas/*
+.docker/mariadb/shared/*
+.docker/apache/vhosts/*.conf
